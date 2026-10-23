@@ -1,9 +1,27 @@
 # Arkael-Mglru
 
-KernelSU/Magisk module for Arkael Kernel (GKI android12-5.10).
-Keeps Multi-Gen LRU enabled after boot and applies `min_ttl_ms`.
+KernelSU/Magisk module for **Arkael Kernel** (GKI android12-5.10).
+Keeps Multi-Gen LRU (MGLRU) enabled after boot and applies `min_ttl_ms`.
 
-- Requires a kernel with `CONFIG_LRU_GEN` (checked at install).
-- Edit `config.conf` in the module folder: `ENABLE`, `MIN_TTL_MS` (0 = off).
-- Log: `/data/adb/modules/arkael_mglru/mglru.log`
-- Build: `sh build.sh` (zip goes to `dist/`).
+## Compatibility
+
+This module only works on **GKI 5.10 kernels that support Arkael Kernel**.
+It requires `CONFIG_LRU_GEN` in the kernel and checks for it at install time.
+
+## Config
+
+Edit `config.conf` in the module folder:
+
+- `ENABLE` : `1` = enable MGLRU, `0` = disable
+- `MIN_TTL_MS` : working-set protection in ms (`0` = off, safest)
+
+Log: `/data/adb/modules/arkael_mglru/mglru.log`
+
+## Build
+
+`sh build.sh` (the zip goes to `dist/`).
+
+## Links
+
+- Telegram: https://t.me/arkaelkernel
+- License: GPL-3.0 (see `LICENSE`)
