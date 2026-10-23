@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Arkael MGLRU</title>
+<style>
+:root{--bg:#0d1120;--panel:#151b30;--line:#262f4e;--text:#e9edf9;--muted:#8f9ac0;--accent:#5eead4;--ink:#042f2a;--warn:#fbbf24;--bad:#fb7185;--r:16px}
+@media(prefers-color-scheme:light){:root{--bg:#eef1fa;--panel:#ffffff;--line:#d6dcf0;--text:#141a33;--muted:#5a6590;--accent:#0f766e;--ink:#ffffff;--warn:#b45309;--bad:#be123c}}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:400 16px/1.5 "Google Sans Text","Google Sans",Roboto,"Segoe UI",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+main{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + var(--window-inset-top,0px) + 20px) 20px calc(env(safe-area-inset-bottom,0px) + var(--window-inset-bottom,0px) + 32px)}
+button,input{font:inherit;color:inherit}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{font-weight:600;font-size:17px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.mono{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-size:12.5px}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px 20px 18px}
+h1{font-size:42px;line-height:1.05;font-weight:600;letter-spacing:-.025em}
+.sub{margin-top:6px;color:var(--muted)}
+.gens{list-style:none;padding:0;margin:22px 0 14px;display:grid;gap:9px}
+.gens li{display:grid;grid-template-columns:74px 1fr;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+.gens i{display:block;height:14px;border-radius:7px;background:var(--accent);opacity:var(--o);transform-origin:left;animation:fill .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--n)*120ms)}
+.gens li:nth-child(1){--o:1;--n:0}.gens li:nth-child(2){--o:.62;--n:1}.gens li:nth-child(3){--o:.36;--n:2}.gens li:nth-child(4){--o:.16;--n:3}
+.off .gens i{background:var(--muted);opacity:.16;animation:none}
+@keyframes fill{from{transform:scaleX(0)}}
+.caption{font-size:13.5px;color:var(--muted)}
+section{margin-top:28px}
+h2{font-size:15px;font-weight:600;margin-bottom:10px}
+.hint{font-size:13.5px;color:var(--muted);margin-bottom:12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.seg button,.steps button{border:0;background:transparent;border-radius:10px;min-height:46px;padding:0 10px;cursor:pointer;color:var(--muted);transition:background .15s,color .15s}
+.seg button[aria-checked=true]{background:var(--accent);color:var(--ink);font-weight:600}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.steps button{border:1px solid var(--line);background:var(--panel)}
+.steps button[aria-checked=true]{border-color:var(--accent);color:var(--accent);font-weight:600}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.custom{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;color:var(--muted)}
+.custom input{width:110px;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.note{margin-top:10px;font-size:13.5px;min-height:20px}
+.note.warn{color:var(--warn)}.note.bad{color:var(--bad)}
+.primary{width:100%;margin-top:22px;min-height:52px;border:0;border-radius:14px;background:var(--accent);color:var(--ink);font-weight:600;cursor:pointer}
+.primary:disabled{opacity:.4;cursor:default}
+.primary:active:not(:disabled){transform:scale(.985)}
+dl{border-top:1px solid var(--line)}
+dl div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+dt{font-size:14.5px}dt span{display:block;font-size:12.5px;color:var(--muted)}
+dd{font-weight:600;font-variant-numeric:tabular-nums}
+details{margin-top:28px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:15px;padding:6px 0}
+pre{margin-top:8px;padding:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font:12.5px/1.55 "Roboto Mono",ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;color:var(--muted)}
+footer{margin-top:30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muted)}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,20px);max-width:calc(100% - 40px);padding:12px 18px;border-radius:14px;background:var(--text);color:var(--bg);font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app">
+<header><p class="brand">Arkael MGLRU</p><p class="small muted" id="ver"></p></header>
+
+<section class="hero" id="hero" style="margin-top:0" aria-live="polite">
+<h1 id="state">Checking</h1>
+<p class="sub mono" id="kern">&nbsp;</p>
+<ol class="gens" aria-hidden="true">
+<li><span>Youngest</span><i></i></li>
+<li><span>Younger</span><i></i></li>
+<li><span>Older</span><i></i></li>
+<li><span>Oldest</span><i></i></li>
+</ol>
+<p class="caption" id="cap">Pages age through four generations. The oldest are reclaimed first.</p>
+</section>
+
+<section>
+<h2>Reclaim algorithm</h2>
+<div class="seg" role="radiogroup" aria-label="Reclaim algorithm" id="algo">
+<button role="radio" aria-checked="false" data-v="0">Classic LRU</button>
+<button role="radio" aria-checked="false" data-v="1">Multi-Gen LRU</button>
+</div>
+</section>
+
+<section>
+<h2>Working-set protection</h2>
+<p class="hint">Keeps pages used in the last few seconds in RAM. If they no longer fit, the kernel kills an app instead of thrashing. Off is the safe default.</p>
+<div class="steps" role="radiogroup" aria-label="Protection time" id="steps">
+<button role="radio" aria-checked="false" data-v="0">Off</button>
+<button role="radio" aria-checked="false" data-v="500">0.5 s</button>
+<button role="radio" aria-checked="false" data-v="1000">1 s</button>
+<button role="radio" aria-checked="false" data-v="3000">3 s</button>
+<button role="radio" aria-checked="false" data-v="5000">5 s</button>
+</div>
+<label class="custom">Custom <input id="ttl" type="number" inputmode="numeric" min="0" max="10000" step="100"> ms</label>
+<p class="note" id="note"></p>
+</section>
+
+<button class="primary" id="apply" disabled>Apply and save</button>
+
+<section>
+<h2>Since boot</h2>
+<dl>
+<div><dt>Reclaim efficiency<span>Pages freed per page scanned by kswapd</span></dt><dd id="s-eff">-</dd></div>
+<div><dt>File pages re-read<span>Evicted, then needed again</span></dt><dd id="s-file">-</dd></div>
+<div><dt>App memory re-read<span>Swapped out, then needed again</span></dt><dd id="s-anon">-</dd></div>
+</dl>
+</section>
+
+<details id="logbox"><summary>Boot log</summary><pre id="log">Open to load.</pre></details>
+
+<footer><span id="mode"></span><a href="https://t.me/arkaelkernel" id="tg">Arkael on Telegram</a></footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const MOD="/data/adb/modules/arkael_mglru",LRU="/sys/kernel/mm/lru_gen";
+const $=s=>document.querySelector(s);
+const preview=typeof ksu==="undefined"||!ksu.exec;
+let cur={},want={e:1,t:0},dirty=false,seq=0;
+const mk={enabled:"0x0003",ttl:"0"};
+function mock(c){
+const o=t=>({errno:0,out:t,err:""});
+if(c.startsWith("#read"))return o(["kernel=5.10.272-Arkael/b025a5684","enabled="+mk.enabled,"ttl="+mk.ttl,"mod_version=v1.1","vm_workingset_refault_anon=7516","vm_workingset_refault_file=153303","vm_pgscan_kswapd=1034443","vm_pgsteal_kswapd=706846"].join("\n"));
+if(c.startsWith("#apply")){const m=c.match(/E=(\d) T=(\d+)/);mk.enabled=m[1]==="1"?"0x0003":"0x0000";mk.ttl=m[2];return o("")}
+if(c.startsWith("#log"))return o("[2026-10-23 13:41:09] Arkael MGLRU\nbefore: 0x0003\nafter: 0x0003\nmin_ttl_ms: 0");
+return o("");
+}
+function exec(cmd){
+return new Promise(res=>{
+if(preview){res(mock(cmd));return}
+const cb="cb_"+Date.now()+"_"+(seq++);
+window[cb]=(errno,out,err)=>{delete window[cb];res({errno:errno,out:out||"",err:err||""})};
+try{ksu.exec(cmd,"{}",cb)}catch(e){delete window[cb];res({errno:-1,out:"",err:String(e)})}
+});
+}
+const READ="#read\n"+
+'echo "kernel=$(uname -r)"\n'+
+'echo "enabled=$(cat '+LRU+'/enabled 2>/dev/null)"\n'+
+'echo "ttl=$(cat '+LRU+'/min_ttl_ms 2>/dev/null)"\n'+
+"grep '^version=' "+MOD+"/module.prop 2>/dev/null | sed 's/^/mod_/'\n"+
+"grep -E '^(workingset_refault_anon|workingset_refault_file|pgscan_kswapd|pgsteal_kswapd) ' /proc/vmstat | sed 's/ /=/;s/^/vm_/'";
+function parse(t){const o={};t.split("\n").forEach(l=>{const i=l.indexOf("=");if(i>0)o[l.slice(0,i)]=l.slice(i+1).trim()});return o}
+function toast(msg,kind){const t=$("#toast");t.textContent=msg;t.className="toast show";clearTimeout(toast.h);toast.h=setTimeout(()=>t.className="toast",3200)}
+const fmt=n=>Number(n).toLocaleString("en-US");
+function hasKernel(){return cur.enabled!==undefined&&cur.enabled!==""}
+function isOn(){return hasKernel()&&(parseInt(cur.enabled,16)&1)===1}
+function renderStatus(){
+const hero=$("#hero"),has=hasKernel(),on=isOn();
+hero.classList.toggle("off",!on);
+$("#state").textContent=!has?"Not in this kernel":on?"Active":"Off";
+$("#kern").textContent=(cur.kernel||"")+(has?"  "+cur.enabled:"");
+$("#cap").textContent=!has?"This kernel has no lru_gen. Flash Arkael Kernel to use this module.":on?"Pages age through four generations. The oldest are reclaimed first.":"The kernel is using the classic active and inactive lists.";
+$("#ver").textContent=cur.mod_version||"";
+$("#mode").textContent=preview?"Preview, not connected to a device":"GPL-3.0";
+}
+function renderStats(){
+const sc=Number(cur.vm_pgscan_kswapd),st=Number(cur.vm_pgsteal_kswapd);
+$("#s-eff").textContent=sc>0?Math.round(st/sc*100)+"%":"-";
+$("#s-file").textContent=cur.vm_workingset_refault_file?fmt(cur.vm_workingset_refault_file):"-";
+$("#s-anon").textContent=cur.vm_workingset_refault_anon?fmt(cur.vm_workingset_refault_anon):"-";
+}
+function renderForm(){
+const has=hasKernel();
+document.querySelectorAll("#algo button").forEach(b=>{b.setAttribute("aria-checked",String(Number(b.dataset.v)===want.e));b.disabled=!has});
+const valid=Number.isInteger(want.t)&&want.t>=0&&want.t<=10000;
+document.querySelectorAll("#steps button").forEach(b=>{b.setAttribute("aria-checked",String(valid&&Number(b.dataset.v)===want.t));b.disabled=!has});
+const inp=$("#ttl");inp.disabled=!has;if(document.activeElement!==inp)inp.value=Number.isNaN(want.t)?"":want.t;
+const n=$("#note");
+if(!valid){n.className="note bad";n.textContent="Enter a whole number from 0 to 10000."}
+else if(want.t>0){n.className="note warn";n.textContent="Apps may be killed when memory is tight. Use this only if you accept that."}
+else{n.className="note";n.textContent=""}
+$("#apply").disabled=!has||!valid;
+}
+async function load(syncForm){
+const r=await exec(READ);cur=parse(r.out);
+renderStatus();renderStats();
+if(syncForm){want.e=isOn()?1:0;want.t=parseInt(cur.ttl,10)||0;dirty=false;renderForm()}
+}
+async function apply(){
+const E=want.e,T=want.t,b=$("#apply");
+if(!(E===0||E===1)||!Number.isInteger(T)||T<0||T>10000){toast("Enter a value from 0 to 10000 ms.");return}
+b.disabled=true;b.textContent="Applying";
+const cfg='printf "# 1 = enable MGLRU, 0 = disable\\nENABLE='+E+'\\n# working-set protection in ms (0 = off, safest)\\nMIN_TTL_MS='+T+'\\n" > '+MOD+"/config.conf";
+const cmd="#apply E="+E+" T="+T+"\n{ echo "+(E?"y":"n")+" > "+LRU+"/enabled && echo "+T+" > "+LRU+"/min_ttl_ms && "+cfg+"; } 2>&1";
+const r=await exec(cmd);
+await load(true);
+const ok=(isOn()?1:0)===E&&(parseInt(cur.ttl,10)||0)===T;
+const why=(r.out||r.err||"").split("\n")[0];
+if(ok&&r.errno===0)toast("Applied and saved");
+else if(ok)toast("Applied, but the config was not saved. "+why);
+else toast("The kernel did not accept the change. "+why);
+b.textContent="Apply and save";renderForm();
+}
+$("#algo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;want.e=Number(b.dataset.v);dirty=true;renderForm()});
+$("#steps").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;want.t=Number(b.dataset.v);dirty=true;renderForm()});
+$("#ttl").addEventListener("input",e=>{const v=e.target.value.trim();want.t=/^\d+$/.test(v)?parseInt(v,10):NaN;dirty=true;renderForm()});
+$("#ttl").addEventListener("blur",renderForm);
+$("#apply").addEventListener("click",apply);
+$("#logbox").addEventListener("toggle",async e=>{
+if(!e.target.open)return;
+const r=await exec("#log\ncat "+MOD+'/mglru.log 2>/dev/null || echo "No log yet. It is written after the next boot."');
+$("#log").textContent=r.out.trim()||"No log yet. It is written after the next boot.";
+});
+$("#tg").addEventListener("click",e=>{if(preview)return;e.preventDefault();exec("#open\nam start -a android.intent.action.VIEW -d https://t.me/arkaelkernel >/dev/null 2>&1")});
+load(true);
+setInterval(()=>{if(!document.hidden)load(false)},5000);
+</script>
+</body>
+</html>

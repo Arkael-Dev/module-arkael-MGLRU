@@ -17,6 +17,10 @@ Edit `config.conf` in the module folder:
 
 Log: `/data/adb/modules/arkael_mglru/mglru.log`
 
+## WebUI
+
+Open the module in KernelSU Manager and tap Open (WebUI). Switch MGLRU, set `min_ttl_ms`, and read reclaim stats. Changes apply live and are saved to `config.conf`.
+
 ## Build
 
 `sh build.sh` (the zip goes to `dist/`).

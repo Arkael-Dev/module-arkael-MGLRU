@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1
+
+- Added a WebUI: switch MGLRU on or off, set min_ttl_ms, and see reclaim stats.
+- Changes apply live and are saved to config.conf.
+
 ## v1.0
 
 - Initial release.
