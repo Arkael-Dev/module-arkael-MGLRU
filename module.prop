@@ -4,3 +4,5 @@ version=v1.0
 versionCode=1
 author=Arkael-Dev
 description=Keeps Multi-Gen LRU enabled after boot and applies min_ttl_ms from config.conf. Requires a kernel with CONFIG_LRU_GEN.
+updateJson=https://raw.githubusercontent.com/Arkael-Dev/module-arkael-MGLRU/main/update.json
+changelog=https://raw.githubusercontent.com/Arkael-Dev/module-arkael-MGLRU/main/CHANGELOG.md
