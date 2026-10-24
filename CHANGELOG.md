@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2
+
+- Added configurable RAM tuning (ram_tune.sh): swappiness, page-cluster, vfs_cache_pressure.
+- New config.conf options: RAM_TUNE, SWAPPINESS, PAGE_CLUSTER, VFS_CACHE_PRESSURE.
+
 ## v1.1
 
 - Added a WebUI: switch MGLRU on or off, set min_ttl_ms, and see reclaim stats.
