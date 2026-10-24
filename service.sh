@@ -7,6 +7,7 @@ MIN_TTL_MS=0
 [ -f "$MODDIR/config.conf" ] && . "$MODDIR/config.conf"
 case "$ENABLE" in 0|1) ;; *) ENABLE=1 ;; esac
 case "$MIN_TTL_MS" in ''|*[!0-9]*) MIN_TTL_MS=0 ;; esac
+(sh "$MODDIR/ram_tune.sh" &)
 until [ "$(getprop sys.boot_completed)" = "1" ]; do sleep 5; done
 sleep 15
 {
